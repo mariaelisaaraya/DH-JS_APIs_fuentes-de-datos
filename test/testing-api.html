@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Testing del API - Catálogo de Celulares</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+            color: #fff;
+            padding: 30px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #9556f6;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 0 0 20px rgba(149, 86, 246, 0.8);
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #9556f6;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .test-section h2 {
+            color: #4585ff;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #4585ff;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #9556f6;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4585ff;
+            box-shadow: 0 0 15px rgba(69, 133, 255, 0.5);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #9556f6, #4585ff);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(149, 86, 246, 0.8);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .test-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 5px solid #666;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .test-item.success {
+            border-left-color: #00cc7e;
+            background: rgba(0, 204, 126, 0.1);
+        }
+
+        .test-item.error {
+            border-left-color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .test-item.warning {
+            border-left-color: #ffa502;
+            background: rgba(255, 165, 2, 0.1);
+        }
+
+        .test-icon {
+            font-size: 1.5rem;
+            min-width: 30px;
+        }
+
+        .test-content {
+            flex: 1;
+        }
+
+        .test-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .test-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .test-details {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+
+        .json-preview {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #9556f6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .json-preview pre {
+            color: #00cc7e;
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card.success { border-color: #00cc7e; }
+        .stat-card.error { border-color: #ff4757; }
+        .stat-card.warning { border-color: #ffa502; }
+        .stat-card.info { border-color: #4585ff; }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #4585ff;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #4585ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-banner {
+            background: rgba(255, 71, 87, 0.2);
+            border: 2px solid #ff4757;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-banner h3 {
+            color: #ff4757;
+            margin-bottom: 10px;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #4585ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Testing del API - Catálogo de Celulares</h1>
+
+        <!-- Sección de configuración -->
+        <div class="test-section">
+            <h2>⚙️ Configuración</h2>
+            <div class="input-group">
+                <label for="api-url">URL del API (Google Apps Script):</label>
+                <input 
+                    type="text" 
+                    id="api-url" 
+                    placeholder="https://script.google.com/macros/s/AKfycby.../exec"
+                    value=""
+                >
+            </div>
+            <button class="btn" onclick="runAllTests()">▶️ Ejecutar Todos los Tests</button>
+        </div>
+
+        <!-- Resultados -->
+        <div id="results" class="results" style="display: none;">
+            <!-- Estadísticas -->
+            <div class="stats" id="stats"></div>
+
+            <!-- Tests individuales -->
+            <div class="test-section">
+                <h2>📋 Resultados de Tests</h2>
+                <div id="test-list"></div>
+            </div>
+
+            <!-- Vista previa del JSON -->
+            <div class="test-section">
+                <h2>📄 Vista Previa de Datos</h2>
+                <div id="json-preview"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SISTEMA DE TESTING
+        // ============================================
+
+        let testResults = [];
+        let apiData = null;
+
+        // Función principal que ejecuta todos los tests
+        async function runAllTests() {
+            const apiUrl = document.getElementById('api-url').value.trim();
+            
+            // Validar que haya URL
+            if (!apiUrl) {
+                alert('⚠️ Por favor ingresa la URL del API');
+                return;
+            }
+
+            // Limpiar resultados anteriores
+            testResults = [];
+            apiData = null;
+            
+            // Mostrar loading
+            showLoading();
+
+            // Ejecutar tests en secuencia
+            await test1_ValidateURL(apiUrl);
+            await test2_FetchAPI(apiUrl);
+            await test3_ValidateResponse(apiData);
+            await test4_ValidateStructure(apiData);
+            await test5_ValidateFields(apiData);
+            await test6_ValidateDataTypes(apiData);
+            await test7_ValidateImages(apiData);
+            await test8_ValidatePrices(apiData);
+            await test9_CountRecords(apiData);
+            await test10_CheckDuplicates(apiData);
+
+            // Mostrar resultados
+            displayResults();
+        }
+
+        // ============================================
+        // TEST 1: Validar formato de URL
+        // ============================================
+        async function test1_ValidateURL(url) {
+            const test = {
+                id: 1,
+                title: 'Validar formato de URL',
+                description: 'Verifica que la URL tenga el formato correcto de Google Apps Script'
+            };
+
+            try {
+                const isValid = url.includes('script.google.com') && 
+                               url.includes('/macros/s/') && 
+                               url.endsWith('/exec');
+                
+                if (isValid) {
+                    test.status = 'success';
+                    test.message = 'URL tiene el formato correcto de Google Apps Script';
+                } else {
+                    test.status = 'warning';
+                    test.message = 'URL no parece ser de Google Apps Script. Verifica que sea correcta.';
+                }
+            } catch (error) {
+                test.status = 'error';
+                test.message = `Error: ${error.message}`;
+            }
+
+            testResults.push(test);
+        }
+
+        // ============================================
+        // TEST 2: Hacer fetch al API
+        // ============================================
+        async function test2_FetchAPI(url) {
+            const test = {
+                id: 2,
+                title: 'Conectar con el API',
+                description: 'Intenta hacer una petición al endpoint'
+            };
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(url);
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+
+                if (response.ok) {
+                    apiData = await response.json();
+                    test.status = 'success';
+                    test.message = `Conexión exitosa. Tiempo de respuesta: ${responseTime}ms`;
+                    test.details = `Status: ${response.status} ${response.statusText}`;
+                } else {
+                    test.status = 'error';
+                    test.message = `Error HTTP: ${response.status} ${response.statusText}`;
+                    test.details = 'El servidor respondió pero con un error. Verifica la configuración de Apps Script.';
+                }
+            } catch (error) {
+                test.status = 'error';
+                test.message = `No se pudo conectar al API`;
+                test.details = `Error: ${error.message}\n\nPosibles causas:\n- URL incorrecta\n- Apps Script no está implementado\n- Permisos de "Cualquier usuario" no configurados\n- Problemas de CORS`;
+            }
+
+            testResults.push(test);
+        }
+
+        // ============================================
+        // TEST 3: Validar respuesta
+        // ============================================
+        async function test3_ValidateResponse(data) {
+            const test = {
+                id: 3,
+                title: 'Validar respuesta del API',
+                description: 'Verifica que la respuesta sea un array válido'
+            };
+
+            try {
+                if (!data) {
+                    test.status = 'error';
+                    test.message = 'No se recibió respuesta del API';
+                } else if (!Array.isArray(data)) {
+                    test.status = 'error';
+                    test.message = 'La respuesta no es un array';
+                    test.details = `Tipo recibido: ${typeof data}`;
+                } else if (data.length === 0) {
+                    test.status = 'warning';
+                    test.message = 'El API respondió con un array vacío';
+                    test.details = 'Verifica que tu Google Sheet tenga datos';
+                } else {
+                    test.status = 'success';
+                    test.message = `Array válido con ${data.length} registros`;
+                }
+            } catch (error) {
+                test.status = 'error';
+                test.message = `Error: ${error.message}`;
+            }
+
+            testResults.push(test);
+        }
+
+        // ============================================
+        // TEST 4: Validar estructura de datos
+        // ============================================
+        async function test4_ValidateStructure(data) {
+            const test = {
+                id: 4,
+                title: 'Validar estructura de objetos',
+                description: 'Verifica que los objetos tengan las propiedades necesarias'
+            };
+
+            try {
+                if (!data || data.length === 0) {
+                    test.status = 'error';
+                    test.message = 'No hay datos para validar';
+                    testResults.push(test);
+                    return;
+                }
+
+                const requiredFields = ['idCelular', 'marca', 'modelo', 'precio', 'lanzamiento', 'imagen'];
+                const firstItem = data[0];
+                const itemFields = Object.keys(firstItem);
+                
+                const missingFields = requiredFields.filter(field => !itemFields.includes(field));
+                
+                if (missingFields.length === 0) {
+                    test.status = 'success';
+                    test.message = 'Todos los campos requeridos están presentes';
+                    test.details = `Campos encontrados: ${itemFields.join(', ')}`;
+                } else {
+                    test.status = 'error';
+                    test.message = `Faltan campos requeridos: ${missingFields.join(', ')}`;
+                    test.details = `Campos encontrados: ${itemFields.join(', ')}\nCampos requeridos: ${requiredFields.join(', ')}`;
+                }
+            } catch (error) {
+                test.status = 'error';
+                test.message = `Error: ${error.message}`;
+            }
+
+            testResults.push(test);
+        }
+
+        // ============================================
+        // TEST 5: Validar campos obligatorios
+        // ============================================
+        async function test5_ValidateFields(data) {
+            const test = {
+                id: 5,
+                title: 'Validar campos obligatorios',
+                description: 'Verifica que todos los registros tengan datos en campos clave'
+            };
+
+            try {
+                if (!data || data.length === 0) {
+                    test.status = 'error';
+                    test.message = 'No hay datos para validar';
+                    testResults.push(test);
+                    return;
+                }
+
+                const emptyFields = [];
+                data.forEach((item, index) => {
+                    if (!item.idCelular) emptyFields.push(`Fila ${index + 1}: falta idCelular`);
+                    if (!item.marca) emptyFields.push(`Fila ${index + 1}: falta marca`);
+                    if (!item.modelo) emptyFields.push(`Fila ${index + 1}: falta modelo`);
+                });
+
+                if (emptyFields.length === 0) {
+                    test.status = 'success';
+                    test.message = 'Todos los registros tienen los campos obligatorios';
+                } else {
+                    test.status = 'warning';
+                    test.message = `${emptyFields.length} campos vacíos encontrados`;
+                    test.details = emptyFields.slice(0, 10).join('\n') + 
+                                  (emptyFields.length > 10 ? '\n...' : '');
+                }
+            } catch (error) {
+                test.status = 'error';
+                test.message = `Error: ${error.message}`;
+            }
+
+            testResults.push(test);
+        }
+
+        // ============================================
+        // TEST 6: Validar tipos de datos
+        // ============================================
+        async function test6_ValidateDataTypes(data) {
+            const test = {
+                id: 6,
+                title: 'Validar tipos de datos',
+                description: 'Verifica que los datos tengan el tipo correcto'
+            };
+
+            try {
+                if (!data || data.length === 0) {
+                    test.status = 'error';
+                    test.message = 'No hay datos para validar';
+                    testResults.push(test);
+                    return;
+                }
+
+                const errors = [];
+                data.forEach((item, index) => {
+                    // Validar que lanzamiento sea número
+                    if (item.lanzamiento && typeof item.lanzamiento !== 'number') {
+                        errors.push(`Fila ${index + 1}: lanzamiento debería ser número, es ${typeof item.lanzamiento}`);
+                    }
+                    
+                    // Validar que strings sean strings
+                    if (item.marca && typeof item.marca !== 'string') {
+                        errors.push(`Fila ${index + 1}: marca debería ser texto`);
+                    }
+                });
+
+                if (errors.length === 0) {
+                    test.status = 'success';
+                    test.message = 'Todos los datos tienen el tipo correcto';
+                } else {
+                    test.status = 'warning';
+                    test.message = `${errors.length} problemas de tipo encontrados`;
+                    test.details = errors.slice(0, 5).join('\n');
+                }
+            } catch (error) {
+                test.status = 'error';
+                test.message = `Error: ${error.message}`;
+            }
+
+            testResults.push(test);
+        }
+
+        // ============================================
+        // TEST 7: Validar URLs de imágenes
+        // ============================================
+        async function test7_ValidateImages(data) {
+            const test = {
+                id: 7,
+                title: 'Validar URLs de imágenes',
+                description: 'Verifica que las URLs de imágenes sean válidas'
+            };
+
+            try {
+                if (!data || data.length === 0) {
+                    test.status = 'error';
+                    test.message = 'No hay datos para validar';
+                    testResults.push(test);
+                    return;
+                }
+
+                const invalidImages = [];
+                data.forEach((item, index) => {
+                    if (item.imagen) {
+                        try {
+                            new URL(item.imagen);
+                            if (!item.imagen.match(/\.(jpg|jpeg|png|gif|webp|svg)/i)) {
+                                invalidImages.push(`Fila ${index + 1}: URL no parece ser una imagen`);
+                            }
+                        } catch {
+                            invalidImages.push(`Fila ${index + 1}: URL inválida`);
+                        }
+                    } else {
+                        invalidImages.push(`Fila ${index + 1}: falta URL de imagen`);
+                    }
+                });
+
+                if (invalidImages.length === 0) {
+                    test.status = 'success';
+                    test.message = 'Todas las URLs de imágenes son válidas';
+                } else {
+                    test.status = 'warning';
+                    test.message = `${invalidImages.length} imágenes con problemas`;
+                    test.details = invalidImages.slice(0, 5).join('\n');
+                }
+            } catch (error) {
+                test.status = 'error';
+                test.message = `Error: ${error.message}`;
+            }
+
+            testResults.push(test);
+        }
+
+        // ============================================
+        // TEST 8: Validar precios
+        // ============================================
+        async function test8_ValidatePrices(data) {
+            const test = {
+                id: 8,
+                title: 'Validar formato de precios',
+                description: 'Verifica que los precios tengan formato correcto'
+            };
+
+            try {
+                if (!data || data.length === 0) {
+                    test.status = 'error';
+                    test.message = 'No hay datos para validar';
+                    testResults.push(test);
+                    return;
+                }
+
+                const invalidPrices = [];
+                data.forEach((item, index) => {
+                    if (!item.precio) {
+                        invalidPrices.push(`Fila ${index + 1}: falta precio`);
+                    } else if (!item.precio.toString().includes('$')) {
+                        invalidPrices.push(`Fila ${index + 1}: precio sin símbolo $`);
+                    }
+                });
+
+                if (invalidPrices.length === 0) {
+                    test.status = 'success';
+                    test.message = 'Todos los precios tienen formato correcto';
+                } else {
+                    test.status = 'warning';
+                    test.message = `${invalidPrices.length} precios con problemas`;
+                    test.details = invalidPrices.slice(0, 5).join('\n');
+                }
+            } catch (error) {
+                test.status = 'error';
+                test.message = `Error: ${error.message}`;
+            }
+
+            testResults.push(test);
+        }
+
+        // ============================================
+        // TEST 9: Contar registros
+        // ============================================
+        async function test9_CountRecords(data) {
+            const test = {
+                id: 9,
+                title: 'Contar registros',
+                description: 'Estadísticas de los datos'
+            };
+
+            try {
+                if (!data || data.length === 0) {
+                    test.status = 'warning';
+                    test.message = 'No hay registros';
+                    testResults.push(test);
+                    return;
+                }
+
+                // Contar marcas únicas
+                const marcas = [...new Set(data.map(item => item.marca))];
+                
+                // Contar por año
+                const años = [...new Set(data.map(item => item.lanzamiento))].sort();
+
+                test.status = 'success';
+                test.message = `${data.length} productos encontrados`;
+                test.details = `Marcas únicas: ${marcas.length} (${marcas.join(', ')})\nAños: ${años.join(', ')}`;
+            } catch (error) {
+                test.status = 'error';
+                test.message = `Error: ${error.message}`;
+            }
+
+            testResults.push(test);
+        }
+
+        // ============================================
+        // TEST 10: Verificar duplicados
+        // ============================================
+        async function test10_CheckDuplicates(data) {
+            const test = {
+                id: 10,
+                title: 'Verificar IDs duplicados',
+                description: 'Busca IDs repetidos en los datos'
+            };
+
+            try {
+                if (!data || data.length === 0) {
+                    test.status = 'error';
+                    test.message = 'No hay datos para validar';
+                    testResults.push(test);
+                    return;
+                }
+
+                const ids = data.map(item => item.idCelular);
+                const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+
+                if (duplicates.length === 0) {
+                    test.status = 'success';
+                    test.message = 'No hay IDs duplicados';
+                } else {
+                    test.status = 'warning';
+                    test.message = `${duplicates.length} IDs duplicados encontrados`;
+                    test.details = `IDs duplicados: ${[...new Set(duplicates)].join(', ')}`;
+                }
+            } catch (error) {
+                test.status = 'error';
+                test.message = `Error: ${error.message}`;
+            }
+
+            testResults.push(test);
+        }
+
+        // ============================================
+        // MOSTRAR LOADING
+        // ============================================
+        function showLoading() {
+            const results = document.getElementById('results');
+            results.style.display = 'block';
+            results.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Ejecutando tests...</p>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // MOSTRAR RESULTADOS
+        // ============================================
+        function displayResults() {
+            // Calcular estadísticas
+            const success = testResults.filter(t => t.status === 'success').length;
+            const errors = testResults.filter(t => t.status === 'error').length;
+            const warnings = testResults.filter(t => t.status === 'warning').length;
+            const total = testResults.length;
+
+            // Mostrar estadísticas
+            const statsHtml = `
+                <div class="stat-card success">
+                    <div class="stat-number">${success}</div>
+                    <div class="stat-label">✅ Exitosos</div>
+                </div>
+                <div class="stat-card error">
+                    <div class="stat-number">${errors}</div>
+                    <div class="stat-label">❌ Errores</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-number">${warnings}</div>
+                    <div class="stat-label">⚠️ Advertencias</div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-number">${total}</div>
+                    <div class="stat-label">📊 Total Tests</div>
+                </div>
+            `;
+            document.getElementById('stats').innerHTML = statsHtml;
+
+            // Mostrar lista de tests
+            const testsHtml = testResults.map(test => {
+                const icon = test.status === 'success' ? '✅' : 
+                            test.status === 'error' ? '❌' : '⚠️';
+                
+                return `
+                    <div class="test-item ${test.status}">
+                        <div class="test-icon">${icon}</div>
+                        <div class="test-content">
+                            <div class="test-title">${test.title}</div>
+                            <div class="test-description">${test.message}</div>
+                            ${test.details ? `<div class="test-details">${test.details}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('test-list').innerHTML = testsHtml;
+
+            // Mostrar preview del JSON
+            if (apiData) {
+                const preview = apiData.slice(0, 3); // Primeros 3 registros
+                document.getElementById('json-preview').innerHTML = `
+                    <div class="json-preview">
+                        <pre>${JSON.stringify(preview, null, 2)}</pre>
+                        ${apiData.length > 3 ? `<p style="color: #4585ff; margin-top: 10px;">... y ${apiData.length - 3} registros más</p>` : ''}
+                    </div>
+                `;
+            }
+
+            // Scroll suave hacia resultados
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

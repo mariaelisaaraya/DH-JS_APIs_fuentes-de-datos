@@ -1,0 +1,21 @@
+{
+  "name": "catalogo-celulares-testing",
+  "version": "1.0.0",
+  "description": "Sistema de testing para el proyecto Catálogo de Celulares con Google Sheets API",
+  "main": "test-api.js",
+  "scripts": {
+    "test": "node test-api.js",
+    "test:watch": "nodemon test-api.js"
+  },
+  "keywords": [
+    "testing",
+    "api",
+    "google-sheets",
+    "digital-house"
+  ],
+  "author": "María Elisa Araya",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
