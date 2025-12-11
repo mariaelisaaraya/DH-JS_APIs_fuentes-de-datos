@@ -8,9 +8,9 @@ Una aplicación web que conecta una Google Sheet con JavaScript mediante Google 
 
 ## 🎥 Video Tutorial
 
-https://url
+[Ver video en YouTube](https://youtu.be/d75sswDeDpw?si=761xxHoFkfWaeapU)
 
-> 💡 video subido a YouTube
+> 💡 video subido a YouTube con detalles y tips
 
 ---
 
