@@ -374,10 +374,21 @@
                 const responseTime = endTime - startTime;
 
                 if (response.ok) {
-                    apiData = await response.json();
-                    test.status = 'success';
-                    test.message = `Conexión exitosa. Tiempo de respuesta: ${responseTime}ms`;
-                    test.details = `Status: ${response.status} ${response.statusText}`;
+                    const respuesta = await response.json();
+                    
+                    // El código de Digital House devuelve { datos: [...] }
+                    if (respuesta.datos) {
+                        apiData = respuesta.datos;
+                        test.status = 'success';
+                        test.message = `Conexión exitosa. Tiempo de respuesta: ${responseTime}ms`;
+                        test.details = `Status: ${response.status} ${response.statusText}\nMensaje: ${respuesta.mensaje}`;
+                    } else {
+                        // Si no tiene el campo datos, puede ser otro formato
+                        test.status = 'warning';
+                        test.message = `API responde pero formato inesperado`;
+                        test.details = `La respuesta no tiene el campo "datos". Estructura: ${Object.keys(respuesta).join(', ')}`;
+                        apiData = Array.isArray(respuesta) ? respuesta : [];
+                    }
                 } else {
                     test.status = 'error';
                     test.message = `Error HTTP: ${response.status} ${response.statusText}`;
@@ -727,12 +738,16 @@
         function showLoading() {
             const results = document.getElementById('results');
             results.style.display = 'block';
-            results.innerHTML = `
+            
+            // Limpiar solo los contenedores de resultados, no el HTML completo
+            document.getElementById('stats').innerHTML = `
                 <div class="loading">
                     <div class="spinner"></div>
                     <p>Ejecutando tests...</p>
                 </div>
             `;
+            document.getElementById('test-list').innerHTML = '';
+            document.getElementById('json-preview').innerHTML = '';
         }
 
         // ============================================
@@ -798,6 +813,10 @@
             // Scroll suave hacia resultados
             document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
         }
+        //https://script.google.com/macros/s/AKfycbzMSpNjG5LLH7WEQa99tsdKhjvVRKAhNSuSQkbZ-NoDwNNcJkvp7VNfKWYCYvYzkcbpFg/exec
+
     </script>
+    
 </body>
 </html>
+
