@@ -1,17 +1,16 @@
 // ============================================
-// SCRIPT DE TESTING PARA NODE.JS
+// SCRIPT DE TESTING PARA NODE.JS CON AXIOS
 // ============================================
-// Ejecutar: node test-api.js
+// Ejecutar: npm test
 
-const https = require('https');
-const http = require('http');
+const axios = require('axios');
 
 // ============================================
 // CONFIGURACIÓN
 // ============================================
 
 // 🔴 IMPORTANTE: Coloca aquí la URL de tu API
-const API_URL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzMSpNjG5LLH7WEQa99tsdKhjvVRKAhNSuSQkbZ-NoDwNNcJkvp7VNfKWYCYvYzkcbpFg/exec';
 
 // Colores para la consola
 const colors = {
@@ -38,40 +37,38 @@ let stats = {
 };
 
 // ============================================
-// FUNCIÓN PARA HACER FETCH
+// FUNCIÓN PARA HACER FETCH CON AXIOS
 // ============================================
 
-function fetchAPI(url) {
-    return new Promise((resolve, reject) => {
-        const protocol = url.startsWith('https') ? https : http;
-        
-        const startTime = Date.now();
-        protocol.get(url, (res) => {
-            let data = '';
-            
-            res.on('data', (chunk) => {
-                data += chunk;
-            });
-            
-            res.on('end', () => {
-                const endTime = Date.now();
-                const responseTime = endTime - startTime;
-                
-                try {
-                    const jsonData = JSON.parse(data);
-                    resolve({
-                        status: res.statusCode,
-                        data: jsonData,
-                        responseTime: responseTime
-                    });
-                } catch (error) {
-                    reject(new Error('Respuesta no es JSON válido'));
-                }
-            });
-        }).on('error', (error) => {
-            reject(error);
+async function fetchAPI(url) {
+    const startTime = Date.now();
+    
+    try {
+        const response = await axios.get(url, {
+            maxRedirects: 5,
+            timeout: 10000,
+            validateStatus: function (status) {
+                return status >= 200 && status < 400;
+            }
         });
-    });
+        
+        const endTime = Date.now();
+        const responseTime = endTime - startTime;
+        
+        return {
+            status: response.status,
+            data: response.data,
+            responseTime: responseTime
+        };
+    } catch (error) {
+        if (error.response) {
+            throw new Error(`HTTP ${error.response.status}: ${error.response.statusText}`);
+        } else if (error.request) {
+            throw new Error('No se recibió respuesta del servidor');
+        } else {
+            throw new Error(error.message);
+        }
+    }
 }
 
 // ============================================
@@ -121,7 +118,7 @@ async function test1_ValidateURL() {
         } else if (API_URL === 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI') {
             test.status = 'error';
             test.message = 'No has configurado la URL del API';
-            test.details = 'Edita la línea 13 de este archivo con tu URL de Apps Script';
+            test.details = 'Edita la línea 14 de este archivo con tu URL de Apps Script';
         } else {
             test.status = 'warning';
             test.message = 'URL no parece ser de Google Apps Script';
@@ -143,11 +140,20 @@ async function test2_FetchAPI() {
 
     try {
         const response = await fetchAPI(API_URL);
-        apiData = response.data;
+        
+        // El código de Digital House devuelve: { datos: [...], mensaje: "...", ... }
+        // Extraer el array de datos
+        if (response.data && response.data.datos) {
+            apiData = response.data.datos;
+        } else if (Array.isArray(response.data)) {
+            apiData = response.data;
+        } else {
+            apiData = null;
+        }
         
         test.status = 'success';
         test.message = `Conexión exitosa (${response.responseTime}ms)`;
-        test.details = `Status: ${response.status}`;
+        test.details = `Status: ${response.status} | ${apiData ? apiData.length + ' registros' : 'Sin datos'}`;
     } catch (error) {
         test.status = 'error';
         test.message = 'No se pudo conectar al API';
@@ -241,7 +247,7 @@ async function test5_ValidateFields() {
     } else {
         test.status = 'warning';
         test.message = `${empty.length} campos vacíos`;
-        test.details = empty.slice(0, 3).join('\n');
+        test.details = empty.slice(0, 3).join(', ');
     }
 
     logTest(test);
@@ -276,7 +282,7 @@ async function test6_ValidateImages() {
     } else {
         test.status = 'warning';
         test.message = `${invalid.length} problemas`;
-        test.details = invalid.slice(0, 3).join('\n');
+        test.details = invalid.slice(0, 3).join(', ');
     }
 
     logTest(test);
@@ -301,7 +307,7 @@ async function test7_CountRecords() {
 
     test.status = 'success';
     test.message = `${apiData.length} productos`;
-    test.details = `Marcas: ${marcas.length} | Años: ${años.join(', ')}`;
+    test.details = `${marcas.length} marcas | Años: ${años[0]}-${años[años.length-1]}`;
 
     logTest(test);
 }
@@ -339,8 +345,10 @@ async function runAllTests() {
 
     // Conclusión
     console.log('\n');
-    if (stats.error === 0) {
-        console.log(`${colors.green}${colors.bold}🎉 ¡TODOS LOS TESTS PASARON!${colors.reset}\n`);
+    if (stats.error === 0 && stats.warning === 0) {
+        console.log(`${colors.green}${colors.bold}🎉 ¡TODOS LOS TESTS PASARON PERFECTAMENTE!${colors.reset}\n`);
+    } else if (stats.error === 0) {
+        console.log(`${colors.yellow}${colors.bold}✅ Tests OK (con ${stats.warning} advertencias)${colors.reset}\n`);
     } else if (stats.error < 3) {
         console.log(`${colors.yellow}${colors.bold}⚠️  Hay algunos errores que corregir${colors.reset}\n`);
     } else {
