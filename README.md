@@ -1,16 +1,13 @@
 # 📱 Catálogo de Celulares - Google Sheets + JavaScript
 
-Proyecto educativo desarrollado para **Digital House Argentina** como parte del desafío **"JS: APIs + fuentes de datos"**.
+
+[![Ver Demo](https://img.shields.io/badge/🌐_Ver_Demo_en_Vivo-9556f6?style=for-the-badge)](https://mariaelisaaraya.github.io/DH-JS_APIs_fuentes-de-datos/catalogo-celulares/)
+[![Video Tutorial](https://img.shields.io/badge/▶️_Video_Tutorial-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/d75sswDeDpw?si=761xxHoFkfWaeapU)
+[![GitHub](https://img.shields.io/badge/GitHub-mariaelisaaraya-181717?style=for-the-badge&logo=github)](https://github.com/mariaelisaaraya)
+
+**Proyecto educativo para Digital House  -  "JS: APIs + fuentes de datos"**
 
 Una aplicación web que conecta una Google Sheet con JavaScript mediante Google Apps Script, permitiendo mostrar y filtrar productos dinámicamente desde una hoja de cálculo.
-
----
-
-## 🎥 Video Tutorial
-
-https://url
-
-> 💡 video subido a YouTube
 
 ---
 
